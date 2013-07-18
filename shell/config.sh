@@ -4,7 +4,7 @@
 # @version 0.1
 
 if [ "$#" -lt "1" ];then
-    echo "Usage:source $0 config_file"
+    echo "Usage:source $0 config_file(配置文件路径) var_prefix(变量前缀)"
     exit 0
 fi
 
@@ -13,6 +13,7 @@ IFS='
 '
 
 config_path=$1
+prefix=$2
 
 get_prop(){
     key=$2
@@ -22,7 +23,7 @@ get_prop(){
 for line in $(grep -v "^#\|^$" $config_path)
 do
     key=$(echo $line | awk -F "=" '{print $1}'|tr -d ' ')
-    full_key=CONFIG_$key
+    full_key=$prefix$key
     value=$(get_prop $config_path $key)
     export $full_key=$value
 done
