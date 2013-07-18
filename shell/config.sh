@@ -9,8 +9,6 @@ if [ "$#" -lt "1" ];then
 fi
 
 #set the seperator to "linefeed(\n)"
-IFS='
-'
 
 config_path=$1
 prefix=$2
@@ -20,11 +18,17 @@ get_prop(){
     grep  "^\s*${2}\s*=" ${config_path}| sed "s%\s*${2}\s*=\s*\(.*\)%\1%"
 }
 
-for line in $(grep -v "^#\|^$" $config_path)
+while read line
 do
+    filter_line=$(echo $line|tr -d '' |grep -v '^\s*#\|^$')
+    
+    if [ "$filter_line" = "" ];then
+        continue
+    fi
+
     key=$(echo $line | awk -F "=" '{print $1}'|tr -d ' ')
     full_key=$prefix$key
     value=$(get_prop $config_path $key)
     export $full_key=$value
-done
+done < $config_path
 
