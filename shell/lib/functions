@@ -1,0 +1,42 @@
+#!/bin/sh
+# @author: qiaozhou qiaozhou@aliyun-inc.com
+# @version: 0.1
+
+#fetch the current directory name
+get_cur_dir(){
+    cur_dir=$(dirname $0)
+    echo $cur_dir
+}
+
+#strip the blank and the comment
+strip(){
+    data=$(echo $1|tr -d '' |grep -v '^\s*#\|^$')
+    echo $data
+}
+
+#set the output info to red
+red(){
+    echo -e "\033[1;31m$@\033[0m"
+}
+
+#set the output info to green 
+green(){
+    echo -e "\033[1;32m$@\033[0m"
+}
+
+#set the output info to blue
+blue(){
+    echo -e "\033[1;34m$@\033[0m"
+}
+
+#check string is empty or not
+is_empty(){
+    [ -z "$1" ] && echo 1 || echo 0
+}
+
+#check two string is equals or not
+equals(){
+    [ "$1" = "$2" ] && echo 1 || echo 0
+}
+
+
