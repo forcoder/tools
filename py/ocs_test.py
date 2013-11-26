@@ -46,7 +46,7 @@ print memc.get("a")
 #incr_res = memc.incr("incrKey", 1)
 #print memc.get("incrKey")
 
-
+sys.exit(1)
 for i in range(0,100):
 	put_res = memc.set("test" + str(i), "5555");
 	print put_res
