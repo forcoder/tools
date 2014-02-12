@@ -18,6 +18,7 @@
 # (http://www.fsf.org/licensing/licenses/gpl.html)
 
 # this script requires some packages
+#set -x
 
 WGET=`which wget 2> /dev/null`
 BZIP2=`which bzip2 2> /dev/null`
@@ -65,7 +66,8 @@ function findworkspace()
 {
   # default working directory and mirror
   
-  mirror=ftp://mirror.mcs.anl.gov/pub/cygwin
+#  mirror=ftp://mirror.mcs.anl.gov/pub/cygwin
+  mirror=http://mirrors.163.com/cygwin
   cache=/setup
   
   # work wherever setup worked last, if possible
@@ -91,19 +93,19 @@ function findworkspace()
 
 function getsetup() 
 {
-  arch=$(uname -m)
   if test "$noscripts" == "0" -a "$noupdate" == "0"
   then
+    local mirror=$mirror/x86_64
     touch setup.ini
     mv setup.ini setup.ini-save
-    wget -N $mirror/${arch}/setup.bz2
+    wget -N $mirror/setup.bz2
     if test -e setup.bz2 && test $? -eq 0
     then
       bunzip2 setup.bz2
       mv setup setup.ini
       echo Updated setup.ini
     else
-      wget -N $mirror/${arch}/setup.ini
+      wget -N $mirror/setup.ini
       if test -e setup.ini && test $? -eq 0
       then
         echo Updated setup.ini
@@ -346,19 +348,20 @@ case "$command" in
     digactual=`md5sum $file | awk '{print $1}'`
     if ! test $digest = $digactual
     then
-       echo MD5 sum did not match, exiting
-       exit 1
+      echo MD5 sum did not match, exiting
+      exit 1
     fi
     
     echo "Unpacking..."
-    #判断扩展名是否为.bz2
-    ext=".bz2"
-    if [[ ${file/${ext}//} == $file ]]; then
-      cat $file | xz -d | tar > "/etc/setup/$pkg.lst" xvf - -C /
+    if [[ "${file/.bz/}" != "$file" ]];then
+    	cat $file | bunzip2 | tar > "/etc/setup/$pkg.lst" xvf - -C /
     else
-      cat $file | bunzip2 | tar > "/etc/setup/$pkg.lst" xvf - -C /
+    	cat $file | xz -d | tar > "/etc/setup/$pkg.lst" xvf - -C /
     fi
-
+    if [[ "$?" != "0" ]];then
+    	exit 1
+    fi
+    
     gzip -f "/etc/setup/$pkg.lst"
     cd ../..
     
