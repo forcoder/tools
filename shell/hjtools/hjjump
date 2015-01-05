@@ -1,0 +1,74 @@
+#!/bin/bash
+
+trap "exit" INT
+
+cur_dir=$(cd $(dirname $0);pwd)
+. $cur_dir/lib/functions
+jump_dir=$cur_dir/hj_jump
+cd $jump_dir
+while [ -z "$env" ];
+do
+    select env in $(ls $jump_dir)
+    do
+        break
+    done
+
+    if [ -z "$env" ];then
+        red "机器环境不存在,请重新选择"
+    fi
+done
+
+cd $env
+
+while [ -z "$group" ];
+do
+    select group in $(ls .)
+    do
+        break
+    done
+
+    if [ -z "$group" ];then
+        red "机器分组不存在,请重新选择"
+    fi
+done
+
+ip_list=""
+while read line
+do
+    host_ip=$(echo $line|cut -d ' ' -f 2)
+    host=$(echo $line|cut -d ' ' -f 1)
+    ip_list="$ip_list
+	$host:$host_ip"
+done < $group
+
+while [ -z "$ip" ]
+do
+    select ip_line in $(echo $ip_list)
+    do
+        ip=$(echo $ip_line|cut -d ':' -f 2)
+        break
+    done
+
+    if [ -z "$ip" ];then
+        red "机器ip不存在,请重新选择"
+    fi
+done
+
+login_user="qiaozhou"
+user_list="qiaozhou
+root
+"
+select user in $(echo "$user_list")
+do
+    break
+done
+
+if [ -n "$user" ];then
+    login_user=$user
+fi
+
+if [ "$env" == "online" ];then
+    ssh $login_user@$ip
+else
+    $cur_dir/sshpass -f ~/software/password ssh $login_user@$ip
+fi
